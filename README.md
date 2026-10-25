@@ -1,4 +1,29 @@
 # PocketPay
+About the Project
+
+PayFlow is a simulated digital wallet project built to practise software development. It demonstrates a wallet dashboard and payment-system concepts without transferring real money.
+
+Live Demo
+
+Add your Render website link here.
+
+Source Code
+
+https://github.com/kiorazw98-netizen/DiVi5
+
+Technologies Used
+Python
+FastAPI
+HTML
+CSS
+Key Features
+Digital wallet dashboard
+Simulated wallet balance
+Payment simulation
+User-friendly interface
+Purpose
+
+To develop my skills in backend programming, web development, and fintech application design.
 
 PocketPay is a wallet demonstration with a responsive browser UI, REST API, SQLite persistence, password-based login, user/admin permissions, multiple ZAR wallets, invoices, transaction messages, activity analytics, digital receipts, and an administrator audit log. Internal transfers are simulated. Optional Stripe Checkout top-ups charge a real payment method and credit the local wallet after a signed webhook confirms payment; this demo does not provide withdrawals or bank transfers.
 
