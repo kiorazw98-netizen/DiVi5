@@ -1,0 +1,596 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f7fc">
+  <title>PocketPay — Digital wallet</title>
+  <style>
+    :root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;color:#182338;background:#f4f7fc;font-synthesis:none}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% -20%,#fff 0,#f4f7fc 64%)}button,input,select,textarea{font:inherit}
+    button{cursor:pointer;border:0;border-radius:11px;padding:12px 17px;background:linear-gradient(135deg,#203c68,#172b4d);color:white;font-weight:700;box-shadow:0 5px 12px #172b4d18;transition:transform .18s ease,box-shadow .18s ease,background .18s ease}
+    button:hover{background:linear-gradient(135deg,#294a7a,#10203b);box-shadow:0 8px 18px #172b4d25;transform:translateY(-1px)}button:disabled{opacity:.55;cursor:not-allowed;box-shadow:none;transform:none}
+    .shell{max-width:1160px;margin:auto;padding:30px 28px 64px}.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;padding-bottom:20px;border-bottom:1px solid #e2e8f1}
+    .brand{display:flex;align-items:center;gap:9px;font-size:21px;font-weight:850;letter-spacing:-.8px;color:#172b4d}.brand:before{content:"P";display:grid;place-items:center;width:32px;height:32px;border-radius:10px;background:linear-gradient(145deg,#294b7d,#172b4d);color:#fff;font-size:17px;letter-spacing:-1px;box-shadow:0 4px 10px #172b4d25}.brand span{color:#365b91}.top-right{display:flex;gap:14px;align-items:center;color:#66748a;font-size:13px}
+    .quiet{background:#edf1f7;color:#263b5b;box-shadow:none}.quiet:hover{background:#e1e8f2;color:#172b4d;box-shadow:none}.grid{display:grid;grid-template-columns:1.15fr .85fr;gap:20px;align-items:start}
+    .dashboard-nav{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 28px;padding:6px;width:fit-content;max-width:100%;border:1px solid #e5eaf2;border-radius:13px;background:#fff;box-shadow:0 4px 14px #1d315008}.dashboard-nav a{padding:9px 13px;border-radius:9px;color:#586981;text-decoration:none;font-size:12px;font-weight:680;transition:background .18s ease,color .18s ease}.dashboard-nav a:hover{background:#edf2f9;color:#172b4d}
+    .card{background:#fff;border:1px solid #e3e9f1;border-radius:20px;padding:26px;box-shadow:0 10px 30px #1d31500b}
+    .dashboard-intro{margin:0 0 22px}.dashboard-intro h1{margin:0 0 6px;font-size:30px;letter-spacing:-1px;color:#182b49}.dashboard-intro p{margin:0;color:#758198;font-size:14px}
+    .balance{position:relative;isolation:isolate;align-self:stretch;overflow:hidden;background:linear-gradient(125deg,#08090c 0%,#111722 45%,#172b4d 100%);color:white;min-height:240px;display:flex;flex-direction:column;justify-content:space-between}
+    .balance:after{position:absolute;z-index:-1;content:"";width:290px;height:290px;right:-120px;top:-150px;border:1px solid #ff1744c7;border-radius:50%;box-shadow:0 0 0 28px #ff17445c,0 0 0 58px #ff17443b}
+    .balance .eyebrow,.balance-foot{position:relative;z-index:1;color:#fff}
+    .balance .amount{position:relative;z-index:1;color:#fff}
+    .eyebrow{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;opacity:.7}.amount{font-size:46px;font-weight:760;letter-spacing:-2.2px;margin-top:18px}
+    .balance-foot{font-size:12px;opacity:.78}.card h2{font-size:17px;margin:0 0 20px;letter-spacing:-.35px;color:#203452}
+    .virtual-card-section{display:flex;align-items:center;justify-content:space-between;gap:24px}
+    .virtual-card-copy{max-width:340px}.virtual-card-copy h2{margin-bottom:8px}.virtual-card-copy p{margin:0;color:#798078;font-size:13px;line-height:1.6}
+    .virtual-card{position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;width:min(100%,390px);min-height:220px;padding:22px 24px;border-radius:18px;color:#fff;background:linear-gradient(135deg,#08090c,#181a1f 70%,#292b30);box-shadow:0 14px 30px #08090c38}
+    .virtual-card:after{position:absolute;content:"";width:240px;height:240px;right:-90px;top:-120px;border:1px solid #ffffff24;border-radius:50%;box-shadow:0 0 0 24px #ffffff0a,0 0 0 48px #ffffff08}
+    .virtual-card-top,.virtual-card-bottom{position:relative;z-index:1;display:flex;justify-content:space-between;align-items:center;gap:10px}
+    .virtual-card-brand{font-weight:800;letter-spacing:-.3px}.virtual-card-tag{border:1px solid #ffffff55;border-radius:20px;padding:5px 8px;font-size:8px;font-weight:750;letter-spacing:.65px}
+    .virtual-card-number{position:relative;z-index:1;font-size:20px;letter-spacing:2.3px;font-variant-numeric:tabular-nums;white-space:nowrap}
+    .virtual-card-label{display:block;margin-bottom:5px;color:#ffffffb8;font-size:9px;letter-spacing:1px;text-transform:uppercase}
+    .virtual-card-holder{overflow-wrap:anywhere;font-size:12px;font-weight:650}
+    .virtual-card-network{font-size:19px;font-weight:850;font-style:italic;letter-spacing:-1px}
+    label{display:block;font-size:12px;font-weight:620;color:#5d6c83;margin:0 0 7px}input,select{width:100%;border:1px solid #dce3ed;background:#fbfcfe;border-radius:10px;padding:12px 13px;margin-bottom:15px;color:#202b3e;transition:border-color .18s ease,box-shadow .18s ease,background .18s ease}
+    input:hover,select:hover{border-color:#c7d2e2;background:#fff}    input:focus,select:focus,textarea:focus{outline:none;border-color:#5273a2;box-shadow:0 0 0 3px #5273a21b;background:#fff}.form-row{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:12px}.send-button{width:100%;margin-top:2px}
+    .notice{min-height:18px;margin:11px 0 0;color:#b33d36;font-size:13px}.section{margin-top:20px;scroll-margin-top:20px}.section-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:17px}
+    .section-head h2{font-size:18px;margin:0;color:#203452}.muted{font-size:13px;color:#79869a}.table-wrap{overflow:auto}
+    .transaction-filters{display:grid;grid-template-columns:minmax(220px,1fr) repeat(2,minmax(150px,.35fr));gap:12px;margin-bottom:12px}
+    .transaction-filters label{margin:0}.transaction-filters input,.transaction-filters select{margin:6px 0 0}
+    .wallet-list,.analytics-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
+    .wallet-item,.metric{border:1px solid #e6ebf3;border-radius:14px;padding:17px;background:linear-gradient(145deg,#fff,#f8fafe)}
+    .wallet-item strong,.metric strong{display:block;color:#203452;font-size:18px;margin-bottom:5px}.wallet-item span,.metric span{color:#79869a;font-size:12px}
+    .compact-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;align-items:end;margin-top:16px}
+    .compact-form label{margin:0}.compact-form input,.compact-form select{margin:6px 0 0}.compact-form button{min-height:42px}
+    .inline-notice{min-height:18px;margin:10px 0 0;color:#536680;font-size:13px}
+    .analytics-months{display:grid;gap:12px;margin-top:20px}.month-row{display:grid;grid-template-columns:90px 1fr auto;gap:12px;align-items:center;font-size:12px;color:#62718a}
+    .month-track{height:11px;background:#e9eef6;border-radius:8px;overflow:hidden}.month-bar{height:100%;background:linear-gradient(90deg,#365b91,#7294c4);border-radius:8px}
+    .message-button,.receipt{background:transparent;color:#294b7c;padding:4px 7px;font-size:12px}.message-button:hover,.receipt:hover{background:#f0f4fa;text-decoration:underline}
+    .message-list{display:grid;gap:10px;max-height:300px;overflow:auto;margin:12px 0}
+    .message-item{border-radius:10px;background:#f2f5fa;padding:11px 13px;font-size:13px;line-height:1.5}
+    .message-item strong{display:block;color:#294b7c;font-size:12px;margin-bottom:3px}.message-item time{display:block;color:#79869a;font-size:11px;margin-top:5px}
+    table{border-collapse:collapse;width:100%;min-width:640px;text-align:left}th{font-size:10px;letter-spacing:.9px;text-transform:uppercase;color:#7c899d;font-weight:700;padding:13px 11px;border-bottom:1px solid #e8edf4}
+    td{font-size:13px;padding:15px 11px;border-bottom:1px solid #eef1f6}tbody tr:hover{background:#fafbfd}td:first-child{font-weight:650}.money{font-variant-numeric:tabular-nums;font-weight:700;color:#203452}
+    .badge{display:inline-block;border-radius:20px;padding:5px 10px;font-size:10px;font-weight:750;text-transform:capitalize;letter-spacing:.15px}.successful{background:#e5f3eb;color:#26744a}.pending{background:#fff3d9;color:#9b6a08}.failed{background:#fbe9e7;color:#ad4138}
+    .login{max-width:430px;margin:8vh auto}.login h1{margin:0 0 8px}.login p{font-size:14px;color:#71786e;line-height:1.6}
+    .demo{background:#f0f3f8;border-radius:10px;padding:13px;font-size:12px;color:#596258;line-height:1.8;margin:12px 0 17px}
+    .hidden{display:none!important}.footer{text-align:center;color:#8792a3;font-size:12px;margin-top:28px}
+    dialog{border:1px solid #e3e9f1;border-radius:20px;padding:26px;max-width:480px;width:calc(100% - 32px);box-shadow:0 20px 70px #14233d30}dialog::backdrop{background:#17233db0;backdrop-filter:blur(3px)}
+    .receipt-box{border:1px dashed #cdd4ca;border-radius:10px;padding:16px;margin:15px 0;font-size:13px;line-height:1.8}
+    @media(max-width:760px){.shell{padding:20px 15px 40px}.grid{grid-template-columns:1fr}.top{margin-bottom:20px}.top-right{gap:8px}.top-right #user-label{max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.amount{font-size:38px}.card{padding:20px;border-radius:17px}.dashboard-intro h1{font-size:26px}.dashboard-nav{width:100%;overflow-x:auto;flex-wrap:nowrap}.dashboard-nav a{white-space:nowrap}.transaction-filters{grid-template-columns:1fr}.virtual-card-section{align-items:stretch;flex-direction:column}.virtual-card{min-height:200px}.month-row{grid-template-columns:70px 1fr}.month-row .month-total{grid-column:2}}
+    @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important}}
+  </style>
+</head>
+<body>
+  <main id="login-view" class="shell login">
+    <section class="card">
+      <div class="brand">Pocket<span>Pay</span></div>
+      <h1 style="font-size:27px;margin-top:28px">Your money, made simple.</h1>
+      <p>Internal transfers are simulated. Optional Stripe top-ups may charge a real payment method when enabled.</p>
+      <form id="login-form">
+        <label for="email">Email address</label><input id="email" type="email" autocomplete="username" required>
+        <label for="password">Password</label><input id="password" type="password" autocomplete="current-password" minlength="8" required>
+        <button type="submit" style="width:100%">Sign in</button>
+      </form>
+      <div class="notice" id="login-notice" role="alert"></div>
+      <div class="demo"><strong>Demo accounts</strong><br>alice@example.com / alice-demo-password<br>bob@example.com / bob-demo-password<br>admin@example.com / admin-demo-password</div>
+      <button id="show-register" class="quiet" style="width:100%">Create a new wallet</button>
+      <form id="register-form" class="hidden" style="margin-top:20px">
+        <label for="register-email">Email address</label><input id="register-email" type="email" required>
+        <label for="register-password">Password (at least 8 characters)</label><input id="register-password" type="password" minlength="8" required>
+        <button type="submit" style="width:100%">Create wallet</button>
+      </form>
+    </section>
+    <div class="footer">Internal transfers are simulated. Stripe top-ups may charge a real payment method when configured.</div>
+  </main>
+
+  <main id="app-view" class="shell hidden">
+    <header class="top">
+      <div class="brand">Pocket<span>Pay</span></div>
+      <div class="top-right"><span id="user-label"></span><button id="logout" class="quiet">Sign out</button></div>
+    </header>
+    <nav class="dashboard-nav" aria-label="Dashboard sections">
+      <a href="#wallets-section">My wallets</a><a href="#topup-section">Add money</a>
+      <a href="#invoices-section">Invoices</a><a href="#transactions-section">Activity &amp; messages</a>
+      <a href="#analytics-section">Analytics</a>
+    </nav>
+    <section class="dashboard-intro" aria-labelledby="dashboard-title">
+      <h1 id="dashboard-title">Dashboard</h1>
+      <p>Your wallet balance, payments, and recent activity in one place.</p>
+    </section>
+    <div class="grid">
+      <section class="card balance">
+        <div><div class="eyebrow">Wallet balance</div><div id="balance" class="amount">R 0.00</div></div>
+        <div id="balance-currency" class="balance-foot">ZAR · Simulated funds only</div>
+      </section>
+      <section class="card">
+        <h2>Send Money</h2>
+        <form id="transfer-form">
+          <label for="transfer-wallet">From wallet</label><select id="transfer-wallet" required></select>
+          <label for="recipient">Recipient email</label><input id="recipient" type="email" placeholder="friend@example.com" required>
+          <div class="form-row">
+            <div><label for="amount">Amount (ZAR)</label><input id="amount" type="number" min="0.01" step="0.01" placeholder="0.00" required></div>
+            <div><label for="description">Note (optional)</label><input id="description" type="text" maxlength="200" placeholder="What is it for?"></div>
+          </div>
+          <button class="send-button" type="submit">Review &amp; send</button>
+        </form>
+        <div class="notice" id="transfer-notice" role="status"></div>
+      </section>
+    </div>
+    <section class="card section" id="wallets-section">
+      <div class="section-head"><h2>My wallets</h2><span class="muted">Separate ZAR balances</span></div>
+      <div id="wallet-list" class="wallet-list"></div>
+      <form id="wallet-form" class="compact-form">
+        <label for="wallet-name">New wallet name<input id="wallet-name" type="text" minlength="2" maxlength="40" placeholder="Savings" required></label>
+        <button type="submit">Create wallet</button>
+      </form>
+      <div id="wallet-notice" class="inline-notice" role="status"></div>
+    </section>
+    <section class="card section" id="topup-section">
+      <div class="section-head"><h2>Add money</h2><span id="topup-availability" class="muted">Checking Stripe setup…</span></div>
+      <p class="muted">Top-ups are credited only after Stripe confirms payment through a signed webhook.</p>
+      <form id="topup-form" class="compact-form">
+        <label for="topup-wallet">To wallet<select id="topup-wallet" required></select></label>
+        <label for="topup-amount">Amount (ZAR)<input id="topup-amount" type="number" min="1" step="0.01" placeholder="100.00" required></label>
+        <button id="topup-button" type="submit" disabled>Continue to Stripe</button>
+      </form>
+      <div id="topup-notice" class="inline-notice" role="status"></div>
+      <div id="topup-history" class="muted" style="margin-top:12px"></div>
+    </section>
+    <section class="card section virtual-card-section" aria-labelledby="virtual-card-title">
+      <div class="virtual-card-copy">
+        <h2 id="virtual-card-title">Virtual card</h2>
+        <p>A demo-only card preview for your PocketPay wallet. It has no real card number and cannot be used to make purchases.</p>
+      </div>
+      <div class="virtual-card" role="img" aria-label="Simulated Visa card preview with masked placeholder number, not valid for payments">
+        <div class="virtual-card-top">
+          <span class="virtual-card-brand">PocketPay</span>
+          <span class="virtual-card-tag">DEMO ONLY · NOT FOR PAYMENTS</span>
+        </div>
+        <div class="virtual-card-number" aria-hidden="true">•••• &nbsp;•••• &nbsp;•••• &nbsp;0000</div>
+        <div class="virtual-card-bottom">
+          <div><span class="virtual-card-label">Cardholder</span><span class="virtual-card-holder">Dephine</span></div>
+          <span class="virtual-card-network" aria-hidden="true">VISA</span>
+        </div>
+      </div>
+    </section>
+    <section id="audit-card" class="card section hidden">
+      <div class="section-head"><h2>Audit log</h2><span class="muted">Administrator access</span></div>
+      <div class="table-wrap"><table><thead><tr><th>Time</th><th>Action</th><th>Actor</th><th>Transaction</th></tr></thead><tbody id="audit-body"></tbody></table></div>
+    </section>
+    <section class="card section" id="invoices-section">
+      <div class="section-head"><h2>Invoices</h2><span class="muted">Create and pay wallet requests</span></div>
+      <form id="invoice-form" class="compact-form">
+        <label for="invoice-customer">Customer email<input id="invoice-customer" type="email" placeholder="customer@example.com" required></label>
+        <label for="invoice-amount">Amount (ZAR)<input id="invoice-amount" type="number" min="0.01" step="0.01" required></label>
+        <label for="invoice-due">Due date<input id="invoice-due" type="date"></label>
+        <label for="invoice-description">Description<input id="invoice-description" type="text" maxlength="200" placeholder="Invoice note"></label>
+        <label for="invoice-wallet">Deposit to<select id="invoice-wallet" required></select></label>
+        <button type="submit">Create invoice</button>
+      </form>
+      <div id="invoice-notice" class="inline-notice" role="status"></div>
+      <div class="table-wrap"><table><thead><tr><th>Customer / issuer</th><th>Invoice</th><th>Due</th><th>Status</th><th>Amount</th><th>Action</th></tr></thead><tbody id="invoices-body"></tbody></table></div>
+      <div id="invoice-empty" class="muted" style="padding:18px 8px;text-align:center">No invoices yet.</div>
+    </section>
+    <section class="card section" id="transactions-section">
+      <div class="section-head"><h2>Transaction History</h2><span id="transaction-count" class="muted" aria-live="polite">Loading transactions…</span></div>
+      <div class="transaction-filters">
+        <label for="transaction-search">Search transactions<input id="transaction-search" type="search" placeholder="Search name, note, or transaction ID"></label>
+        <label for="transaction-status">Status<select id="transaction-status"><option value="">All statuses</option><option value="pending">Pending</option><option value="successful">Successful</option><option value="failed">Failed</option></select></label>
+        <label for="transaction-direction">Direction<select id="transaction-direction"><option value="">Sent and received</option><option value="sent">Sent</option><option value="received">Received</option></select></label>
+      </div>
+      <div class="table-wrap"><table><thead><tr><th>Recipient / sender</th><th>When</th><th>Note</th><th>Status</th><th>Amount</th><th>Actions</th></tr></thead><tbody id="transactions-body"></tbody></table></div>
+      <div id="empty-state" class="muted hidden" style="padding:24px 10px;text-align:center">No transactions yet. Send your first payment above.</div>
+      <div class="muted" style="margin-top:10px">Showing your latest 100 transactions.</div>
+    </section>
+    <section class="card section" id="analytics-section">
+      <div class="section-head"><h2>Activity analytics</h2><span class="muted">Successful activity, ZAR</span></div>
+      <div class="analytics-grid">
+        <div class="metric"><strong id="analytics-received">R 0.00</strong><span>Money in (includes confirmed top-ups)</span></div>
+        <div class="metric"><strong id="analytics-sent">R 0.00</strong><span>Money sent</span></div>
+        <div class="metric"><strong id="analytics-count">0</strong><span>Completed transfers</span></div>
+      </div>
+      <div id="analytics-months" class="analytics-months"></div>
+    </section>
+    <div class="footer">Internal transfers are simulated. Stripe top-ups may charge a real payment method when configured.</div>
+  </main>
+
+  <dialog id="receipt-dialog">
+    <h2 style="margin-top:0">Digital receipt</h2>
+    <div id="receipt-content" class="receipt-box"></div>
+    <button id="close-receipt" class="quiet">Close</button>
+    <button id="print-receipt" style="float:right">Print receipt</button>
+  </dialog>
+  <dialog id="messages-dialog">
+    <h2 style="margin-top:0">Transaction messages</h2>
+    <div id="message-list" class="message-list"></div>
+    <div id="message-notice" class="inline-notice" role="status"></div>
+    <form id="message-form">
+      <label for="message-body">Add a message<textarea id="message-body" maxlength="1000" required style="width:100%;min-height:82px;border:1px solid #dce3ed;border-radius:9px;padding:11px;font:inherit"></textarea></label>
+      <button type="submit">Send message</button>
+      <button id="close-messages" type="button" class="quiet" style="float:right">Close</button>
+    </form>
+  </dialog>
+  <script>
+    const tokenKey = "pocketpay-token";
+    let token = sessionStorage.getItem(tokenKey);
+    let me = null;
+    let transactions = [];
+    let walletList = [];
+    let activeTransactionId = null;
+    const money = (value, currency = me?.currency || "ZAR") => new Intl.NumberFormat("en-ZA", {style:"currency", currency}).format(Number(value));
+    const byId = id => document.getElementById(id);
+    async function api(path, options = {}) {
+      const response = await fetch(path, {
+        ...options,
+        headers: {"Content-Type":"application/json", ...(token ? {Authorization:`Bearer ${token}`} : {}), ...(options.headers || {})}
+      });
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        if (response.status === 401 && token) signOut();
+        throw new Error(body.detail || "Something went wrong. Please try again.");
+      }
+      return body;
+    }
+    function signOut() {
+      sessionStorage.removeItem(tokenKey); token = null; me = null;
+      byId("app-view").classList.add("hidden"); byId("login-view").classList.remove("hidden");
+    }
+    async function enterApp() {
+      me = await api("/api/me");
+      byId("login-view").classList.add("hidden"); byId("app-view").classList.remove("hidden");
+      byId("user-label").textContent = `${me.email}${me.role === "admin" ? " · Admin" : ""}`;
+      byId("audit-card").classList.toggle("hidden", me.role !== "admin");
+      await refreshWallets();
+      await refreshActivity();
+      await refreshInvoices();
+      await refreshAnalytics();
+      await refreshTopups();
+      if (me.role === "admin") await refreshAudit();
+    }
+    async function refreshWallets() {
+      const previousSelection = Number(byId("transfer-wallet").value) || me.wallet_id;
+      walletList = await api("/api/wallets");
+      const options = selector => {
+        const select = byId(selector);
+        select.replaceChildren(...walletList.map(wallet => {
+          const option = document.createElement("option");
+          option.value = wallet.id;
+          option.textContent = `${wallet.name} · ${money(wallet.balance, wallet.currency)}`;
+          return option;
+        }));
+      };
+      ["transfer-wallet", "invoice-wallet", "topup-wallet"].forEach(options);
+      const active = walletList.find(wallet => wallet.id === previousSelection)
+        || walletList.find(wallet => wallet.is_default)
+        || walletList[0];
+      if (active) {
+        byId("transfer-wallet").value = String(active.id);
+        byId("invoice-wallet").value = String(active.id);
+        byId("topup-wallet").value = String(active.id);
+        updateBalance();
+      }
+      byId("wallet-list").replaceChildren(...walletList.map(wallet => {
+        const item = document.createElement("div");
+        item.className = "wallet-item";
+        const name = document.createElement("strong");
+        name.textContent = wallet.name;
+        const balance = document.createElement("span");
+        balance.textContent = `${money(wallet.balance, wallet.currency)}${wallet.is_default ? " · Default" : ""}`;
+        item.append(name, balance);
+        return item;
+      }));
+    }
+    function updateBalance() {
+      const wallet = walletList.find(item => item.id === Number(byId("transfer-wallet").value));
+      if (wallet) {
+        byId("balance").textContent = money(wallet.balance, wallet.currency);
+        byId("balance-currency").textContent = `${wallet.currency} · ${wallet.name}`;
+      }
+    }
+    async function refreshActivity() {
+      transactions = await api("/api/transactions?limit=100");
+      renderActivity();
+    }
+    function renderActivity() {
+      const query = byId("transaction-search").value.trim().toLowerCase();
+      const status = byId("transaction-status").value;
+      const direction = byId("transaction-direction").value;
+      const rows = transactions.filter(tx => {
+        const person = tx.direction === "sent" ? tx.recipient_email : tx.sender_email;
+        const searchable = `${person} ${tx.description} ${tx.id}`.toLowerCase();
+        return (!query || searchable.includes(query))
+          && (!status || tx.status === status)
+          && (!direction || tx.direction === direction);
+      });
+      byId("transaction-count").textContent = `${rows.length} of ${transactions.length} transactions`;
+      byId("empty-state").textContent = transactions.length
+        ? "No transactions match these filters."
+        : "No transactions yet. Send your first payment above.";
+      byId("empty-state").classList.toggle("hidden", rows.length > 0);
+      byId("transactions-body").replaceChildren(...rows.map(tx => {
+        const tr = document.createElement("tr");
+        const person = tx.direction === "sent" ? tx.recipient_email : tx.sender_email;
+        const sign = tx.direction === "sent" ? "−" : "+";
+        const personCell = document.createElement("td");
+        personCell.textContent = person;
+        const dateCell = document.createElement("td");
+        dateCell.textContent = new Date(tx.created_at).toLocaleString();
+        const descriptionCell = document.createElement("td");
+        descriptionCell.textContent = tx.description || "—";
+        const statusCell = document.createElement("td");
+        const badge = document.createElement("span");
+        badge.className = `badge ${tx.status}`;
+        badge.textContent = tx.status;
+        statusCell.append(badge);
+        const amountCell = document.createElement("td");
+        amountCell.className = "money";
+        amountCell.textContent = `${sign}${money(tx.amount, tx.currency)}`;
+        const receiptCell = document.createElement("td");
+        const receiptButton = document.createElement("button");
+        receiptButton.className = "receipt";
+        receiptButton.dataset.id = tx.id;
+        receiptButton.textContent = "Receipt";
+        const messageButton = document.createElement("button");
+        messageButton.className = "message-button";
+        messageButton.dataset.id = tx.id;
+        messageButton.dataset.action = "messages";
+        messageButton.textContent = "Messages";
+        receiptCell.append(receiptButton, messageButton);
+        tr.append(personCell, dateCell, descriptionCell, statusCell, amountCell, receiptCell);
+        return tr;
+      }));
+    }
+    async function refreshInvoices() {
+      const rows = await api("/api/invoices");
+      byId("invoice-empty").classList.toggle("hidden", rows.length > 0);
+      byId("invoices-body").replaceChildren(...rows.map(invoice => {
+        const row = document.createElement("tr");
+        const participant = document.createElement("td");
+        participant.textContent = invoice.direction === "sent" ? invoice.customer_email : invoice.issuer_email;
+        const description = document.createElement("td");
+        description.textContent = invoice.description || `Invoice ${invoice.id.slice(0, 8)}`;
+        const dueDate = document.createElement("td");
+        dueDate.textContent = invoice.due_date || "—";
+        const status = document.createElement("td");
+        const badge = document.createElement("span");
+        badge.className = `badge ${invoice.status === "paid" ? "successful" : invoice.status === "open" ? "pending" : "failed"}`;
+        badge.textContent = invoice.status;
+        status.append(badge);
+        const amount = document.createElement("td");
+        amount.className = "money";
+        amount.textContent = money(invoice.amount, invoice.currency);
+        const action = document.createElement("td");
+        if (invoice.status === "open" && invoice.direction === "received") {
+          const pay = document.createElement("button");
+          pay.textContent = "Pay";
+          pay.dataset.action = "pay-invoice";
+          pay.dataset.id = invoice.id;
+          action.append(pay);
+        } else if (invoice.status === "open") {
+          const cancel = document.createElement("button");
+          cancel.className = "quiet";
+          cancel.textContent = "Cancel";
+          cancel.dataset.action = "cancel-invoice";
+          cancel.dataset.id = invoice.id;
+          action.append(cancel);
+        } else {
+          action.textContent = invoice.paid_transaction_id ? `Paid · ${invoice.paid_transaction_id.slice(0, 8)}` : "—";
+        }
+        row.append(participant, description, dueDate, status, amount, action);
+        return row;
+      }));
+    }
+    async function refreshAnalytics() {
+      const data = await api("/api/analytics");
+      byId("analytics-received").textContent = money(data.received, data.currency);
+      byId("analytics-sent").textContent = money(data.sent, data.currency);
+      byId("analytics-count").textContent = String(data.transaction_count);
+      const maxTotal = Math.max(
+        1,
+        ...data.monthly.map(item => Number(item.sent) + Number(item.received))
+      );
+      const months = data.monthly.map(item => {
+        const total = Number(item.sent) + Number(item.received);
+        const row = document.createElement("div");
+        row.className = "month-row";
+        const month = document.createElement("span");
+        month.textContent = item.month;
+        const track = document.createElement("div");
+        track.className = "month-track";
+        const bar = document.createElement("div");
+        bar.className = "month-bar";
+        bar.style.width = `${Math.max(2, total / maxTotal * 100)}%`;
+        bar.title = `In ${money(item.received, data.currency)} · Out ${money(item.sent, data.currency)}`;
+        track.append(bar);
+        const totalLabel = document.createElement("span");
+        totalLabel.className = "month-total";
+        totalLabel.textContent = money(total, data.currency);
+        row.append(month, track, totalLabel);
+        return row;
+      });
+      if (!months.length) {
+        const empty = document.createElement("div");
+        empty.className = "muted";
+        empty.textContent = "No completed wallet activity in the last six months.";
+        months.push(empty);
+      }
+      byId("analytics-months").replaceChildren(...months);
+    }
+    async function refreshTopups() {
+      const [configuration, rows] = await Promise.all([
+        api("/api/topups/config"),
+        api("/api/topups")
+      ]);
+      byId("topup-button").disabled = !configuration.available;
+      byId("topup-availability").textContent = configuration.available
+        ? "Stripe Checkout ready"
+        : "Stripe setup required";
+      byId("topup-notice").textContent = configuration.available
+        ? "Payments are credited after Stripe webhook confirmation."
+        : "Configure STRIPE_SECRET_KEY and STRIPE_WEBHOOK_SECRET on the server to enable top-ups.";
+      byId("topup-history").textContent = rows.length
+        ? `Recent top-ups: ${rows.map(row => `${money(row.amount, row.currency)} ${row.status}`).join(" · ")}`
+        : "No top-ups yet.";
+    }
+    async function showMessages(transactionId) {
+      activeTransactionId = transactionId;
+      const rows = await api(`/api/transactions/${transactionId}/messages`);
+      byId("message-list").replaceChildren(...rows.map(message => {
+        const item = document.createElement("div");
+        item.className = "message-item";
+        const sender = document.createElement("strong");
+        sender.textContent = message.sender_email;
+        const body = document.createElement("span");
+        body.textContent = message.body;
+        const time = document.createElement("time");
+        time.textContent = new Date(message.created_at).toLocaleString();
+        item.append(sender, body, time);
+        return item;
+      }));
+      if (!byId("messages-dialog").open) byId("messages-dialog").showModal();
+    }
+    async function refreshAudit() {
+      const rows = await api("/api/admin/audit");
+      byId("audit-body").replaceChildren(...rows.map(row => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${new Date(row.created_at).toLocaleString()}</td><td>${escapeHtml(row.action)}</td><td>${escapeHtml(row.actor_email || "System")}</td><td>${escapeHtml(row.transaction_id || "—")}</td>`;
+        return tr;
+      }));
+    }
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, character => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[character]));
+    }
+    byId("login-form").addEventListener("submit", async event => {
+      event.preventDefault(); byId("login-notice").textContent = "";
+      try {
+        const result = await api("/api/login", {method:"POST", body:JSON.stringify({email:byId("email").value,password:byId("password").value})});
+        token = result.token; sessionStorage.setItem(tokenKey, token); await enterApp();
+      } catch (error) { byId("login-notice").textContent = error.message; }
+    });
+    byId("show-register").addEventListener("click", () => {
+      byId("register-form").classList.toggle("hidden");
+      byId("show-register").classList.toggle("hidden");
+    });
+    byId("register-form").addEventListener("submit", async event => {
+      event.preventDefault(); byId("login-notice").textContent = "";
+      try {
+        const result = await api("/api/register", {method:"POST", body:JSON.stringify({email:byId("register-email").value,password:byId("register-password").value})});
+        token = result.token; sessionStorage.setItem(tokenKey, token); await enterApp();
+      } catch (error) { byId("login-notice").textContent = error.message; }
+    });
+    byId("transfer-form").addEventListener("submit", async event => {
+      event.preventDefault();
+      const button = event.submitter; button.disabled = true;
+      byId("transfer-notice").textContent = "";
+      const amount = Number(byId("amount").value).toFixed(2);
+      const walletId = Number(byId("transfer-wallet").value);
+      try {
+        const result = await api("/api/transfers", {method:"POST",body:JSON.stringify({
+          recipient_email:byId("recipient").value, amount, description:byId("description").value,
+          idempotency_key:crypto.randomUUID(), wallet_id:walletId
+        })});
+        byId("transfer-notice").textContent = result.status === "pending" ? "Transfer submitted. Check Transaction History for its latest status." : `Transfer ${result.status}.`;
+        byId("transfer-notice").style.color = result.status === "failed" ? "#ad4138" : "#26744a";
+        byId("transfer-form").reset();
+        byId("transfer-wallet").value = String(walletId);
+        await enterApp();
+      } catch (error) { byId("transfer-notice").textContent = error.message; }
+      finally { button.disabled = false; }
+    });
+    byId("transfer-wallet").addEventListener("change", updateBalance);
+    byId("wallet-form").addEventListener("submit", async event => {
+      event.preventDefault();
+      byId("wallet-notice").textContent = "";
+      try {
+        await api("/api/wallets", {method:"POST", body:JSON.stringify({name:byId("wallet-name").value})});
+        byId("wallet-form").reset();
+        await refreshWallets();
+        byId("wallet-notice").textContent = "Wallet created.";
+      } catch (error) { byId("wallet-notice").textContent = error.message; }
+    });
+    byId("invoice-form").addEventListener("submit", async event => {
+      event.preventDefault();
+      byId("invoice-notice").textContent = "";
+      try {
+        await api("/api/invoices", {method:"POST", body:JSON.stringify({
+          customer_email:byId("invoice-customer").value,
+          amount:Number(byId("invoice-amount").value).toFixed(2),
+          description:byId("invoice-description").value,
+          due_date:byId("invoice-due").value || null,
+          wallet_id:Number(byId("invoice-wallet").value)
+        })});
+        byId("invoice-form").reset();
+        await refreshInvoices();
+        byId("invoice-notice").textContent = "Invoice created and shared with the selected account.";
+      } catch (error) { byId("invoice-notice").textContent = error.message; }
+    });
+    byId("topup-form").addEventListener("submit", async event => {
+      event.preventDefault();
+      byId("topup-notice").textContent = "";
+      try {
+        const result = await api("/api/topups/checkout", {method:"POST", body:JSON.stringify({
+          amount:Number(byId("topup-amount").value).toFixed(2),
+          wallet_id:Number(byId("topup-wallet").value)
+        })});
+        window.location.assign(result.checkout_url);
+      } catch (error) { byId("topup-notice").textContent = error.message; }
+    });
+    byId("transaction-search").addEventListener("input", renderActivity);
+    byId("transaction-status").addEventListener("change", renderActivity);
+    byId("transaction-direction").addEventListener("change", renderActivity);
+    byId("transactions-body").addEventListener("click", async event => {
+      const button = event.target.closest("[data-id]");
+      if (!button) return;
+      if (button.dataset.action === "messages") {
+        try { await showMessages(button.dataset.id); }
+        catch (error) { byId("transfer-notice").textContent = error.message; }
+        return;
+      }
+      try {
+        const receipt = await api(`/api/transactions/${button.dataset.id}/receipt`);
+        const tx = receipt.transaction;
+        byId("receipt-content").innerHTML = `<strong>PocketPay · Simulated receipt</strong><br><br>Receipt: ${escapeHtml(receipt.receipt_id)}<br>Payment: ${escapeHtml(tx.id)}<br>Status: ${escapeHtml(tx.status)}<br>From: ${escapeHtml(tx.sender_email)}<br>To: ${escapeHtml(tx.recipient_email)}<br>Amount: ${money(tx.amount, tx.currency)}<br>Note: ${escapeHtml(tx.description || "—")}<br>Date: ${new Date(tx.created_at).toLocaleString()}<br><br><small>${escapeHtml(receipt.notice)}</small>`;
+        byId("receipt-dialog").showModal();
+      } catch (error) { byId("transfer-notice").textContent = error.message; }
+    });
+    byId("invoices-body").addEventListener("click", async event => {
+      const button = event.target.closest("[data-id]");
+      if (!button) return;
+      byId("invoice-notice").textContent = "";
+      try {
+        if (button.dataset.action === "cancel-invoice") {
+          await api(`/api/invoices/${button.dataset.id}/cancel`, {method:"POST"});
+        } else if (button.dataset.action === "pay-invoice") {
+          await api(`/api/invoices/${button.dataset.id}/pay`, {
+            method:"POST",
+            body:JSON.stringify({
+              idempotency_key:crypto.randomUUID(),
+              wallet_id:Number(byId("transfer-wallet").value)
+            })
+          });
+        }
+        await enterApp();
+      } catch (error) { byId("invoice-notice").textContent = error.message; }
+    });
+    byId("message-form").addEventListener("submit", async event => {
+      event.preventDefault();
+      if (!activeTransactionId) return;
+      byId("message-notice").textContent = "";
+      try {
+        await api(`/api/transactions/${activeTransactionId}/messages`, {
+          method:"POST", body:JSON.stringify({body:byId("message-body").value})
+        });
+        byId("message-form").reset();
+        await showMessages(activeTransactionId);
+      } catch (error) { byId("message-notice").textContent = error.message; }
+    });
+    byId("logout").addEventListener("click", signOut);
+    byId("close-receipt").addEventListener("click", () => byId("receipt-dialog").close());
+    byId("close-messages").addEventListener("click", () => byId("messages-dialog").close());
+    byId("print-receipt").addEventListener("click", () => window.print());
+    if (token) enterApp().catch(signOut);
+  </script>
+</body>
+</html>
